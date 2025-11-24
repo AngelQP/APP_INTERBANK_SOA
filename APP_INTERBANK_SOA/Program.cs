@@ -17,6 +17,11 @@ builder.Services.AddScoped<ServicioMovimiento, IMovimiento>();
 builder.Services.AddScoped<ServicioGuardar, IGuardar>();
 builder.Services.AddScoped<ServicioProducto, IProducto>();
 builder.Services.AddScoped<ServicioCuentaAhorro, ICuentaAhorro>();
+builder.Services.AddScoped<CuentaSaldo, ICuentaSaldo>();
+builder.Services.AddScoped<Transferencia, ITransferencia>();
+builder.Services.AddScoped<Pagos, IPagos>();
+
+
 
 
 
