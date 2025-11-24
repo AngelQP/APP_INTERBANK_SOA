@@ -13,7 +13,7 @@ public partial class Usuario
 
     public string Correo { get; set; } = null!;
 
-    public string ContraseñaHash { get; set; } = null!;
+    public string ContrasenaHash { get; set; } = null!;
 
     public string TipoDocumento { get; set; } = null!;
 
