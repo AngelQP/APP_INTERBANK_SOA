@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace APP_INTERBANK_SOA.Models;
 
@@ -48,7 +46,6 @@ public partial class InterbankContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=tcp:interbank.database.windows.net,1433;Database=INTERBANK;User ID=Admin123;Password=123Admin;Encrypt=True;TrustServerCertificate=False;MultipleActiveResultSets=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -557,10 +554,10 @@ public partial class InterbankContext : DbContext
             entity.Property(e => e.BloqueadoHasta)
                 .HasColumnType("datetime")
                 .HasColumnName("bloqueadoHasta");
-            entity.Property(e => e.ContraseñaHash)
+            entity.Property(e => e.ContrasenaHash)
                 .HasMaxLength(255)
                 .IsUnicode(false)
-                .HasColumnName("contraseñaHash");
+                .HasColumnName("contrasenaHash");
             entity.Property(e => e.Correo)
                 .HasMaxLength(255)
                 .IsUnicode(false)
