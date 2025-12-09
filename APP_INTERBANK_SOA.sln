@@ -1,12 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-<<<<<<< HEAD
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36705.20
-=======
-# Visual Studio Version 18
-VisualStudioVersion = 18.0.11217.181 d18.0
->>>>>>> 063d9062923364dc6f3451629a98330088fb253e
+VisualStudioVersion = 17.14.36705.20 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APP_INTERBANK_SOA", "APP_INTERBANK_SOA\APP_INTERBANK_SOA.csproj", "{EE67F397-B78A-4F4E-ADEA-E579B8CDDD51}"
 EndProject

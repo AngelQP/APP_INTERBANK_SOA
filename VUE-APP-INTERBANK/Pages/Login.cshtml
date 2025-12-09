@@ -1,0 +1,139 @@
+﻿@page
+@model VUE_APP_INTERBANK.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div id="app" class="container mt-5" style="max-width: 500px;">
+
+    <h2 class="mb-4 text-center">Iniciar Sesión</h2>
+
+    <!-- Mensajes de error -->
+    <div v-if="errors.length > 0" class="alert alert-danger">
+        <ul>
+            <li v-for="e in errors">{{ e }}</li>
+        </ul>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    <div v-if="successMessage" class="alert alert-success">
+        {{ successMessage }}
+    </div>
+
+    <!-- Formulario -->
+    <form v-on:submit.prevent="login">
+
+        <div class="mb-3">
+            <label>Documento de Identidad</label>
+            <input type="text" class="form-control" v-model="form.numeroDocumento" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Contraseña</label>
+            <div style="position: relative;">
+                <input v-bind:type="passwordVisible ? 'text' : 'password'"
+                       class="form-control"
+                       v-model="form.password"
+                       required
+                       style="padding-right: 40px;" />
+
+                <span @@mousedown ="mostrarPassword"
+                      @@mouseup ="ocultarPassword"
+                      @@mouseleave ="ocultarPassword"
+                      @@touchstart ="mostrarPassword"
+                      @@touchend ="ocultarPassword"
+                      style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:20px;">
+                    👁️
+                </span>
+            </div>
+        </div>
+
+        <button class="btn btn-primary w-100 mt-3" type="submit">
+            Ingresar
+        </button>
+
+    </form>
+
+</div>
+
+<!-- Librerías -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+
+<!-- Archivo API -->
+<script src="~/js/api/usuarios.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",       
+        data: {
+            form: {
+                numeroDocumento: "",
+                password: ""
+            },
+            errors: [],
+            successMessage: "",
+            passwordVisible: false,
+            timer: null,
+        },
+        methods: {
+
+            mostrarPassword() {
+                this.passwordVisible = true;
+                this.timer = setTimeout(() => {
+                    this.passwordVisible = false;
+                }, 3000);
+            },
+
+            ocultarPassword() {
+                this.passwordVisible = false;
+                if (this.timer) {
+                    clearTimeout(this.timer);
+                    this.timer = null;
+                }
+            },
+
+            login() {
+                console.log("Ejecutando login...");
+
+                this.errors = [];
+                this.successMessage = "";
+
+                UsuariosAPI.login(this.form)
+                    .then(response => {
+
+                        console.log("Respuesta backend:", response);
+
+                        this.successMessage = "Inicio de sesión exitoso.";
+
+                        // Redirección 1–2 segundos después
+                        setTimeout(() => {
+                            window.location.href = "/";
+                        }, 1500);
+                    })
+                    .catch(error => {
+
+                        console.log("Error backend:", error);
+
+                        // Cuando el backend envía `errors: { campo: [] }`
+                        if (error.body && error.body.errors) {
+                            for (let campo in error.body.errors) {
+                                this.errors.push(...error.body.errors[campo]);
+                            }
+                        }
+
+                        // Cuando el backend devuelve error general `message`
+                        if (error.body && error.body.message) {
+                            this.errors.push(error.body.message);
+                        }
+
+                        // Si no llegó nada, mensaje genérico
+                        if (this.errors.length === 0) {
+                            this.errors.push("Credenciales incorrectas o error inesperado.");
+                        }
+                    });
+            }
+
+        }
+    });
+</script>

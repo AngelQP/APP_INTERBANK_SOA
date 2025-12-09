@@ -2,13 +2,14 @@
 {
     public class UsuarioConCuentaDto
     {
-        public int IdUsuario { get; set; }
-        public string NombreCompleto { get; set; } = null!;
+        public int id { get; set; }
+        public string Nombre { get; set; } = null!;
+        public string Apellido { get; set; } = null!;
         public string Correo { get; set; } = null!;
         public string TipoDocumento { get; set; } = null!;
         public string NumeroDocumento { get; set; } = null!;
         public string? Telefono { get; set; }
-        public string EstadoUsuario { get; set; } = null!;
+        public string Estado{ get; set; } = null!;
         public DateTime FechaRegistro { get; set; }
 
         // Datos de la cuenta creada

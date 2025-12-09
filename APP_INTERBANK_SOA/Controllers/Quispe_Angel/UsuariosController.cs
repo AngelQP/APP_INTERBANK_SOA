@@ -98,7 +98,17 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
                 {
                     message = "El número de cuenta ya está registrado."
                 });
-            }            
+            }
+
+            // Validar número de telefono tenga 9 digitos
+
+            if (dto.Telefono.Trim().Length != 9)
+            {
+                return BadRequest(new
+                {
+                    message = "El número de telefono debe tener 9 digítos"
+                });
+            }
 
             // 5. Obtener rol "Cliente"
             var rolCliente = await _context.Rols
@@ -159,13 +169,14 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
 
                 var respuesta = new UsuarioConCuentaDto
                 {
-                    IdUsuario = usuario.IdUsuario,
-                    NombreCompleto = $"{usuario.Nombre} {usuario.Apellido}",
+                    id = usuario.IdUsuario,
+                    Nombre = usuario.Nombre,
+                    Apellido = usuario.Apellido,
                     Correo = usuario.Correo,
                     TipoDocumento = usuario.TipoDocumento,
                     NumeroDocumento = usuario.NumeroDocumento,
                     Telefono = usuario.Telefono,
-                    EstadoUsuario = usuario.Estado,
+                    Estado = usuario.Estado,
                     FechaRegistro = usuario.FechaRegistro,
                     IdCuenta = cuenta.IdCuenta,
                     NumeroCuenta = cuenta.NumeroCuenta,
@@ -207,13 +218,14 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
 
             var respuesta = new UsuarioConCuentaDto
             {
-                IdUsuario = usuario.IdUsuario,
-                NombreCompleto = $"{usuario.Nombre} {usuario.Apellido}",
+                id = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                Apellido = usuario.Apellido,
                 Correo = usuario.Correo,
                 TipoDocumento = usuario.TipoDocumento,
                 NumeroDocumento = usuario.NumeroDocumento,
                 Telefono = usuario.Telefono,
-                EstadoUsuario = usuario.Estado,
+                Estado = usuario.Estado,
                 FechaRegistro = usuario.FechaRegistro,
                 IdCuenta = cuentaPrincipal?.IdCuenta ?? 0,
                 NumeroCuenta = cuentaPrincipal?.NumeroCuenta ?? string.Empty,
@@ -253,13 +265,14 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
 
                 return new UsuarioConCuentaDto
                 {
-                    IdUsuario = u.IdUsuario,
-                    NombreCompleto = $"{u.Nombre} {u.Apellido}",
+                    id = u.IdUsuario,
+                    Nombre = u.Nombre,
+                    Apellido = u.Apellido,
                     Correo = u.Correo,
                     TipoDocumento = u.TipoDocumento,
                     NumeroDocumento = u.NumeroDocumento,
                     Telefono = u.Telefono,
-                    EstadoUsuario = u.Estado,
+                    Estado = u.Estado,
                     FechaRegistro = u.FechaRegistro,
                     IdCuenta = cuentaPrincipal?.IdCuenta ?? 0,
                     NumeroCuenta = cuentaPrincipal?.NumeroCuenta ?? string.Empty,
@@ -400,13 +413,14 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
 
             var respuesta = new UsuarioConCuentaDto
             {
-                IdUsuario = usuario.IdUsuario,
-                NombreCompleto = $"{usuario.Nombre} {usuario.Apellido}",
+                id = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                Apellido = usuario.Apellido,
                 Correo = usuario.Correo,
                 TipoDocumento = usuario.TipoDocumento,
                 NumeroDocumento = usuario.NumeroDocumento,
                 Telefono = usuario.Telefono,
-                EstadoUsuario = usuario.Estado,
+                Estado = usuario.Estado,
                 FechaRegistro = usuario.FechaRegistro,
                 IdCuenta = cuentaPrincipal?.IdCuenta ?? 0,
                 NumeroCuenta = cuentaPrincipal?.NumeroCuenta ?? string.Empty,
@@ -420,7 +434,7 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
         }
 
         // DELETE: api/usuarios/{id}
-        [HttpDelete("{id:int}")]
+        [HttpDelete("eliminarCliente/{id:int}")]
         public async Task<IActionResult> Eliminar(int id)
         {
             // 1. Buscar usuario con sus cuentas
@@ -448,7 +462,7 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
 
 
         // POST: api/usuarios/login
-        [AllowAnonymous]  // público
+        //[AllowAnonymous]  // público
         [HttpPost("login")]
         public async Task<ActionResult<UserLoginResponseDto>> Login([FromBody] UserLoginDto dto)
         {

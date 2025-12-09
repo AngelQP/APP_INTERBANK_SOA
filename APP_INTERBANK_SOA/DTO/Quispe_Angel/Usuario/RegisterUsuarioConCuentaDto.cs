@@ -31,7 +31,7 @@ namespace APP_INTERBANK_SOA.DTO.Quispe_Angel.Usuario
 
         [Phone]
         [StringLength(20)]
-        public string? Telefono { get; set; }
+        public string Telefono { get; set; }
 
         // 🔹 Regla: número de cuenta obligatorio
         [Required]

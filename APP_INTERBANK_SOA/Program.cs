@@ -9,6 +9,22 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MyCors = "_myCors";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyCors,
+        policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+                //.WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS"); ;
+        });
+});
+
+
 // JWT Auth
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
@@ -104,10 +120,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "*");
+        context.Response.Headers.Add("Access-Control-Allow-Methods", "*");
+        context.Response.StatusCode = 200;
+        return;
+    }
+    await next();
+});
+
+app.UseCors(MyCors); // Linea para el frontend
 app.UseAuthentication(); // uso de auth
 app.UseAuthorization();
+
 
 app.MapControllers();
 

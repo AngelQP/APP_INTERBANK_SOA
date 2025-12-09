@@ -1,0 +1,302 @@
+﻿@page
+@model VUE_APP_INTERBANK.Pages.UsuarioModel
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div id="app" class="container mt-4">
+
+    <h2 class="mb-4">Gestión de Usuarios</h2>
+
+    <button class="btn btn-primary mb-3" v-on:click="abrirModalNuevo">
+        Registrar Usuario
+    </button>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>DNI</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="u in listaUsuarios" :key="u.id">
+                <td>{{ u.nombre }}</td>
+                <td>{{ u.apellido }}</td>
+                <td>{{ u.numeroDocumento }}</td>
+                <td>{{ u.correo }}</td>
+                <td>
+                    <span :class="u.estado === 'ACTIVO'
+                        ? 'text-success font-weight-bold'
+                        : 'text-danger font-weight-bold'">
+                        {{ u.estado }}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-sm" v-on:click="editarUsuario(u)">
+                        Editar
+                    </button>
+                    <button class="btn btn-danger btn-sm" v-on:click="confirmarEliminar(u.id)">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <!-- MODAL -->
+    <div class="modal fade" id="modalUsuario" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ tituloModal }}</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- errores -->
+                    <div v-if="errors.length > 0" class="alert alert-danger">
+                        <ul>
+                            <li v-for="e in errors">{{ e }}</li>
+                        </ul>
+                    </div>
+
+                    <form v-on:submit.prevent="guardarUsuario">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Nombre</label>
+                                <input class="form-control" v-model="form.nombre" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Apellido</label>
+                                <input class="form-control" v-model="form.apellido" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Correo</label>
+                                <input type="email" class="form-control" v-model="form.correo" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Contraseña</label>
+                                <input v-if="!modoEdicion"
+                                       type="password"
+                                       class="form-control"
+                                       v-model="form.password"
+                                       required />
+
+                                <input v-else
+                                       type="text"
+                                       class="form-control"
+                                       v-model="form.password"
+                                       disabled />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Tipo de Documento</label>
+                                <select class="form-control" v-model="form.tipoDocumento">
+                                    <option value="DNI">DNI</option>
+                                    <option value="CE">CE</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Número de Documento</label>
+                                <input class="form-control" v-model="form.numeroDocumento" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Teléfono</label>
+                                <input class="form-control" v-model="form.telefono" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Número de Cuenta</label>
+                                <input class="form-control" v-model="form.numeroCuenta" required />
+                            </div>
+
+                            <!-- NUEVO: editar estado -->
+                            <div class="col-md-6 mb-3" v-if="modoEdicion">
+                                <label>Estado del Usuario</label>
+                                <select class="form-control" v-model="form.estado">
+                                    <option value="ACTIVO">ACTIVO</option>
+                                    <option value="INACTIVO">INACTIVO</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <button class="btn btn-success mt-3" type="submit">
+                            Guardar
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/js/api/usuarios.js"></script>
+
+<script>
+new Vue({
+    el: "#app",
+    data: {
+        listaUsuarios: [],
+        modoEdicion: false,
+        tituloModal: "",
+        form: {
+            id: null,
+            nombre: "",
+            apellido: "",
+            correo: "",
+            password: "",
+            tipoDocumento: "DNI",
+            numeroDocumento: "",
+            telefono: "",
+            numeroCuenta: "",
+            estado: "ACTIVO"   // ← agregado
+        },
+        errors: []
+    },
+
+    mounted() {
+        this.cargarUsuarios();
+    },
+
+    methods: {
+
+        cargarUsuarios() {
+            UsuariosAPI.listar()
+                .then(r => {
+                    this.listaUsuarios = r.body.map(u => ({
+                        id: u.id,
+                        nombre: u.nombre,
+                        apellido: u.apellido,
+                        correo: u.correo,
+                        tipoDocumento: u.tipoDocumento,
+                        numeroDocumento: u.numeroDocumento,
+                        telefono: u.telefono,
+                        numeroCuenta: u.numeroCuenta,
+                        estado: u.estado
+                    }));
+                })
+                .catch(err => {
+                    console.log(err);
+                    alert("Error cargando usuarios");
+                });
+        },
+
+        abrirModalNuevo() {
+            this.modoEdicion = false;
+            this.tituloModal = "Registrar Usuario";
+            this.limpiarFormulario();
+            $("#modalUsuario").modal("show");
+        },
+
+        editarUsuario(usuario) {
+            this.modoEdicion = true;
+            this.tituloModal = "Editar Usuario";
+
+            this.form = {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                apellido: usuario.apellido,
+                correo: usuario.correo,
+                password: "",
+                tipoDocumento: usuario.tipoDocumento,
+                numeroDocumento: usuario.numeroDocumento,
+                telefono: usuario.telefono,
+                numeroCuenta: usuario.numeroCuenta,
+                estado: usuario.estado   // ← mapeado
+            };
+
+            $("#modalUsuario").modal("show");
+        },
+
+        guardarUsuario() {
+            this.errors = [];
+
+            if (!this.modoEdicion) {
+
+                UsuariosAPI.registrar(this.form)
+                    .then(() => {
+                        $("#modalUsuario").modal("hide");
+                        this.cargarUsuarios();
+                    })
+                    .catch(err => this.procesarErrores(err));
+
+            } else {
+
+                UsuariosAPI.actualizar(this.form.id, this.form)
+                    .then(() => {
+                        $("#modalUsuario").modal("hide");
+                        this.cargarUsuarios();
+                    })
+                    .catch(err => this.procesarErrores(err));
+            }
+        },
+
+        confirmarEliminar(id) {
+            if (confirm("¿Seguro que deseas eliminar este usuario?")) {
+                UsuariosAPI.eliminar(id)
+                    .then(() => this.cargarUsuarios())
+                    .catch(() => alert("Error eliminando usuario"));
+            }
+        },
+
+        limpiarFormulario() {
+            this.form = {
+                id: null,
+                nombre: "",
+                apellido: "",
+                correo: "",
+                password: "",
+                tipoDocumento: "DNI",
+                numeroDocumento: "",
+                telefono: "",
+                numeroCuenta: "",
+                estado: "ACTIVO"
+            };
+        },
+
+        procesarErrores(error) {
+            this.errors = [];
+
+            if (error.body && error.body.errors) {
+                for (let campo in error.body.errors) {
+                    this.errors.push(...error.body.errors[campo]);
+                }
+            }
+
+            if (error.body && error.body.message) {
+                this.errors.push(error.body.message);
+            }
+
+            if (this.errors.length === 0) {
+                this.errors.push("Error inesperado.");
+            }
+        }
+    }
+});
+</script>
