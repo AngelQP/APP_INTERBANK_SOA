@@ -9,7 +9,8 @@ namespace APP_INTERBANK_SOA.Servicios.Interfaces
 {
     public interface Transferencia
     {
-        Task<IEnumerable<Transferencium>> ListarHistorialAsync();
+        //Task<IEnumerable<Transferencium>> ListarHistorialAsync();
+        Task<IEnumerable<Transferencium>> ListarHistorialAsync(int idUsuario);
         Task<Transferencium?> ObtenerTransferenciaAsync(int idTransferencia);
         Task<(bool success, int? idTransferencia, string message)> CrearTransferenciaAsync(CrearTransferenciaDTO dto);
         Task<bool> ActualizarProgramadaAsync(int idTransferencia, ActualizarTransferenciaDTO dto);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using APP_INTERBANK_SOA.DTO.Ganoza_Sebastian;
+﻿using APP_INTERBANK_SOA.DTO.Ganoza_Sebastian;
 using APP_INTERBANK_SOA.Models;
 using APP_INTERBANK_SOA.Servicios.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +16,7 @@ namespace APP_INTERBANK_SOA.Servicios.Implementaciones
         }
 
         // LISTAR HISTORIAL
-        public async Task<IEnumerable<Transferencium>> ListarHistorialAsync()
+        public async Task<IEnumerable<Transferencium>> ListarHistorialAsync(int idUsuario)
         {
             return await _ctx.Transferencia
                 .OrderByDescending(t => t.Fecha)

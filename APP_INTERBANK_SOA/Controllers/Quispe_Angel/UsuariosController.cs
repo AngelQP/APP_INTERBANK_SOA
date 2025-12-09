@@ -12,7 +12,7 @@ using System.Text;
 namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     //[Authorize]
     [ApiController]
     public class UsuariosController : ControllerBase

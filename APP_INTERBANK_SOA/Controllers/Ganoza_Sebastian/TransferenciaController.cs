@@ -17,11 +17,12 @@ namespace APP_INTERBANK_SOA.Controllers
         }
 
         // GET api/transferencia
-        [HttpGet]
-        public async Task<IActionResult> Listar()
+        [HttpGet("user/{idUsuario:int}")]
+        public async Task<IActionResult> Listar(int idUsuario)
         {
-            var list = (await _svc.ListarHistorialAsync()).ToList();
-            if (!list.Any()) return NotFound(new { message = "No existen transferencias." });
+            var list = (await _svc.ListarHistorialAsync(idUsuario)).ToList();
+            if (!list.Any()) 
+                return NotFound(new { message = "No existen transferencias." });
 
             return Ok(list);
         }
