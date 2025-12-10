@@ -1,0 +1,59 @@
+﻿@page
+@{
+    ViewData["Title"] = "Consultar Saldo";
+}
+
+<div id="app" class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">Consultar Saldo (Modo Prueba)</h2>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="card p-4 mb-3">
+        <p class="text-muted"><strong>IN:</strong> ID Usuario</p>
+
+        <div class="input-group">
+            <input type="number" class="form-control" v-model="idUsuario" placeholder="Ingrese ID Usuario">
+            <div class="input-group-append">
+                <button class="btn btn-primary" v-on:click="consultarSaldo">Consultar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div v-if="resultado" class="card border-primary">
+        <div class="card-header">Resultado OUT:</div>
+        <div class="card-body">
+            <p><strong>Saldo Actual:</strong> {{ resultado.saldoActual }} {{ resultado.moneda }}</p>
+            <p><strong>Estado Cuenta:</strong> {{ resultado.estadoCuenta }}</p>
+            <p><strong>Fecha Consulta:</strong> {{ resultado.fechaConsulta }}</p>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+
+<script src="~/js/api/cuentaSaldo.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            idUsuario: null,
+            resultado: null
+        },
+
+        methods: {
+            consultarSaldo() {
+                if (!this.idUsuario) return alert("Ingrese ID");
+
+                CuentaSaldoAPI.consultar(this.idUsuario)
+                    .then(r => this.resultado = r.body)
+                    .catch(e => alert("Error consultando el saldo"));
+            }
+        }
+    })
+</script>
