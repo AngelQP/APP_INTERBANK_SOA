@@ -242,12 +242,24 @@ namespace APP_INTERBANK_SOA.Controllers.Quispe_Angel
         [HttpGet("listarClientes")]
         public async Task<ActionResult<IEnumerable<UsuarioConCuentaDto>>> Listar([FromQuery] int? cantidad)
         {
-            // 1. Regla de negocio: default 5, máximo 10
-            int take = cantidad ?? 5;
-            if (take <= 0)
-                take = 5;          // si mandan 0 o negativo, usamos el default
-            if (take > 10)
-                take = 10;         // máximo 10
+            int take;
+
+            if (cantidad == -1)
+            {
+                take = int.MaxValue;     // traer todos
+            }
+            else if (cantidad == null || cantidad == 0)
+            {
+                take = 5;                // default
+            }
+            else if (cantidad > 10)
+            {
+                take = 10;               // máximo
+            }
+            else
+            {
+                take = cantidad.Value;   // 1–10
+            }
 
             // 2. Traer usuarios con rol "Cliente"
             var usuarios = await _context.Usuarios

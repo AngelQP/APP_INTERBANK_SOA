@@ -16,8 +16,13 @@ var UsuariosAPI = {
         return Vue.http.post(url, data);
     },
 
-    listar() {
-        var url = `${URL_BASE_USUARIOS}/listarClientes`;
+    listar(cantidad) {
+
+        if (cantidad === undefined || cantidad == null) {
+            cantidad = -1;
+        }
+        console.log({ URL: `${URL_BASE_USUARIOS}/listarClientes?cantidad=${cantidad}` })
+        var url = `${URL_BASE_USUARIOS}/listarClientes?cantidad=${cantidad}`;
         return Vue.http.get(url);
     },
 

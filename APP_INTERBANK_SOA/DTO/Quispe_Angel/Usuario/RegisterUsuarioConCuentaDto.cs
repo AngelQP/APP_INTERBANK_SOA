@@ -30,6 +30,7 @@ namespace APP_INTERBANK_SOA.DTO.Quispe_Angel.Usuario
         public string NumeroDocumento { get; set; } = null!;
 
         [Phone]
+        [Required]
         [StringLength(20)]
         public string Telefono { get; set; }
 
