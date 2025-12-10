@@ -1,0 +1,210 @@
+﻿@page
+@{
+    ViewData["Title"] = "Pagos";
+}
+
+<div id="app" class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-secondary">Pagos (Modo Prueba)</h2>
+
+        <button v-if="servicioActual !== ''"
+                class="btn btn-outline-primary btn-sm"
+                v-on:click="volverAlMenu">
+            <i class="fa fa-arrow-left"></i> Volver a Servicios
+        </button>
+    </div>
+
+    <!-- MENU DE SERVICIOS -->
+    <div v-if="servicioActual === ''">
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <p class="lead">Seleccione el servicio que desea probar:</p>
+            </div>
+
+            <!-- CONSULTAR SALDO -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm btn-card h-100"
+                     v-on:click="seleccionarServicio('CONSULTAR_SALDO')">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary"><i class="fa fa-wallet"></i></h3>
+                        <h5 class="card-title">1. Consultar Saldo</h5>
+                        <p class="text-muted small">GET | IN: idUsuario | OUT: Saldo Actual</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REALIZAR PAGO -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm btn-card h-100"
+                     v-on:click="seleccionarServicio('REALIZAR_PAGO')">
+                    <div class="card-body text-center">
+                        <h3 class="text-success"><i class="fa fa-credit-card"></i></h3>
+                        <h5 class="card-title">2. Realizar Pago</h5>
+                        <p class="text-muted small">POST | IN: idUsuario, idServicio, monto | OUT: Código / Mensaje</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SERVICIO 1: CONSULTAR SALDO -->
+    <div v-if="servicioActual === 'CONSULTAR_SALDO'">
+        <h4 class="mb-3 text-primary">Consultar Saldo</h4>
+
+        <div class="card p-3 bg-light mb-3">
+            <label><strong>IN:</strong> ID Usuario</label>
+            <div class="input-group">
+                <input type="number" class="form-control"
+                       v-model="inputs.idUsuarioSaldo"
+                       placeholder="Ingrese ID Usuario">
+
+                <div class="input-group-append">
+                    <button class="btn btn-primary"
+                            v-on:click="ejecutarConsultarSaldo">
+                        Consultar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary" v-if="resultadoSaldo">
+            <div class="card-header">Resultado OUT:</div>
+            <div class="card-body">
+                <p><strong>Saldo Actual:</strong> {{ resultadoSaldo.saldoActual }} {{ resultadoSaldo.moneda }}</p>
+                <p><strong>Fecha Consulta:</strong> {{ resultadoSaldo.fechaConsulta }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SERVICIO 2: REALIZAR PAGO -->
+    <div v-if="servicioActual === 'REALIZAR_PAGO'">
+        <h4 class="mb-3 text-success">Realizar Pago</h4>
+
+        <div class="card p-3">
+            <p class="text-muted"><strong>IN:</strong> Datos del Pago</p>
+
+            <form v-on:submit.prevent="ejecutarRealizarPago">
+                <div class="form-row">
+
+                    <div class="col-md-4 mb-3">
+                        <label>ID Usuario</label>
+                        <input type="number" class="form-control"
+                               v-model="formPago.idUsuario" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>ID Servicio</label>
+                        <input type="number" class="form-control"
+                               v-model="formPago.idServicio" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Monto</label>
+                        <input type="number" step="0.01" class="form-control"
+                               v-model="formPago.monto" required>
+                    </div>
+
+                </div>
+                <button class="btn btn-success btn-block">Realizar Pago</button>
+            </form>
+        </div>
+
+        <div class="card border-success mt-3" v-if="resultadoPago">
+            <div class="card-header">Resultado OUT:</div>
+            <div class="card-body">
+                <p><strong>Código Operación:</strong> {{ resultadoPago.codigoOperacion }}</p>
+                <p><strong>Estado:</strong> {{ resultadoPago.estado }}</p>
+                <p><strong>Mensaje:</strong> {{ resultadoPago.mensaje }}</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Archivo API personalizado -->
+<script src="~/js/api/pago.js"></script>
+
+<style>
+    .btn-card {
+        cursor: pointer;
+        transition: 0.2s;
+        border: 1px solid #ddd;
+    }
+
+        .btn-card:hover {
+            transform: translateY(-3px);
+            background-color: #f8f9fa;
+            border-color: #007bff;
+        }
+</style>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            servicioActual: "",
+
+            // OUTPUTS
+            resultadoSaldo: null,
+            resultadoPago: null,
+
+            // INPUTS
+            inputs: {
+                idUsuarioSaldo: null
+            },
+            formPago: {
+                idUsuario: null,
+                idServicio: null,
+                monto: null
+            }
+        },
+
+        methods: {
+            seleccionarServicio(servicio) {
+                this.servicioActual = servicio;
+                this.limpiarDatos();
+            },
+
+            volverAlMenu() {
+                this.servicioActual = "";
+                this.limpiarDatos();
+            },
+
+            limpiarDatos() {
+                this.resultadoSaldo = null;
+                this.resultadoPago = null;
+            },
+
+            // --- EJECUCIÓN ---
+
+            // 1) CONSULTAR SALDO
+            ejecutarConsultarSaldo() {
+                if (!this.inputs.idUsuarioSaldo)
+                    return alert("Ingrese ID Usuario");
+
+                PagoAPI.consultarSaldo(this.inputs.idUsuarioSaldo)
+                    .then(res => this.resultadoSaldo = res.body)
+                    .catch(() => alert("Error al consultar saldo"));
+            },
+
+            // 2) REALIZAR PAGO
+            ejecutarRealizarPago() {
+                if (!this.formPago.idUsuario ||
+                    !this.formPago.idServicio ||
+                    !this.formPago.monto)
+                    return alert("Complete todos los campos");
+
+                PagoAPI.realizarPago(this.formPago)
+                    .then(res => this.resultadoPago = res.body)
+                    .catch(() => alert("Error procesando pago"));
+            }
+        }
+    });
+</script>
