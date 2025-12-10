@@ -106,9 +106,19 @@
 
                         this.successMessage = "Inicio de sesión exitoso.";
 
+                        //GUARDA EL ID
+                        if(response.body.idUsuario) {
+                        sessionStorage.setItem("sesion_idUsuario", response.body.idUsuario);
+                        // Opcional: guardar nombre para mostrar "Hola Jhon"
+                         sessionStorage.setItem("sesion_nombre", response.body.nombre);
+                        } else {
+                        // Si el backend no devuelve el ID, esto fallará después
+                        console.warn("El backend no devolvió el idUsuario");
+                        }
+
                         // Redirección 1–2 segundos después
                         setTimeout(() => {
-                            window.location.href = "/";
+                            window.location.href = "/CuentaAhorro";
                         }, 1500);
                     })
                     .catch(error => {

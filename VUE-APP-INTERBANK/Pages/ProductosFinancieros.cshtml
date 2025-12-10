@@ -1,0 +1,241 @@
+﻿@page
+@{
+    ViewData["Title"] = "Productos Financieros";
+}
+
+<div id="app" class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-secondary">Productos Financieros (Modo Prueba)</h2>
+        <button v-if="servicioActual !== ''" class="btn btn-outline-primary btn-sm" v-on:click="volverAlMenu">
+            <i class="fa fa-arrow-left"></i> Volver a Servicios
+        </button>
+    </div>
+
+    <div v-if="servicioActual === ''">
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <p class="lead">Seleccione el servicio que desea probar:</p>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm btn-card h-100" v-on:click="seleccionarServicio('LISTAR_PERSONALIZADOS')">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary"><i class="fa fa-tags"></i></h3>
+                        <h5 class="card-title">1. Listar Ofertas Personalizadas</h5>
+                        <p class="text-muted small">GET | IN: idUsuario | OUT: Lista Productos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm btn-card h-100" v-on:click="seleccionarServicio('VER_DETALLE')">
+                    <div class="card-body text-center">
+                        <h3 class="text-info"><i class="fa fa-search"></i></h3>
+                        <h5 class="card-title">2. Ver Detalle Producto</h5>
+                        <p class="text-muted small">GET | IN: idProducto | OUT: Detalle</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm btn-card h-100" v-on:click="seleccionarServicio('AGREGAR_FAVORITO')">
+                    <div class="card-body text-center">
+                        <h3 class="text-warning"><i class="fa fa-star"></i></h3>
+                        <h5 class="card-title">3. Agregar a Favoritos</h5>
+                        <p class="text-muted small">POST | IN: idUsuario, idProducto | OUT: Mensaje</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm btn-card h-100" v-on:click="seleccionarServicio('ELIMINAR_FAVORITO')">
+                    <div class="card-body text-center">
+                        <h3 class="text-danger"><i class="fa fa-trash"></i></h3>
+                        <h5 class="card-title">4. Eliminar de Favoritos</h5>
+                        <p class="text-muted small">DELETE | IN: idUsuario, idProducto | OUT: Mensaje</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="servicioActual === 'LISTAR_PERSONALIZADOS'">
+        <h4 class="mb-3 text-primary">Listar Ofertas Personalizadas</h4>
+        <div class="card p-3 bg-light mb-3">
+            <label><strong>IN:</strong> ID Usuario</label>
+            <div class="input-group">
+                <input type="number" class="form-control" v-model="inputs.idUsuarioOferta" placeholder="Ingrese ID Usuario">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" v-on:click="ejecutarListarPersonalizados">Consultar</button>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-hover" v-if="listaProductos.length > 0">
+            <thead class="thead-light"><tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Tasa</th><th>Plazo</th></tr></thead>
+            <tbody>
+                <tr v-for="p in listaProductos">
+                    <td>{{ p.idProducto }}</td>
+                    <td>{{ p.nombre }}</td>
+                    <td>{{ p.tipo }}</td>
+                    <td>{{ p.tasaInteres }}%</td>
+                    <td>{{ p.plazo }} meses</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div v-if="servicioActual === 'VER_DETALLE'">
+        <h4 class="mb-3 text-info">Obtener Detalle Producto</h4>
+        <div class="card p-3 bg-light mb-3">
+            <label><strong>IN:</strong> ID Producto</label>
+            <div class="input-group">
+                <input type="number" class="form-control" v-model="inputs.idProductoDetalle" placeholder="Ingrese ID Producto">
+                <div class="input-group-append">
+                    <button class="btn btn-info" v-on:click="ejecutarVerDetalle">Buscar</button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="productoDetalle" class="card border-info">
+            <div class="card-header">Resultado OUT:</div>
+            <div class="card-body">
+                <h3>{{ productoDetalle.nombre }}</h3>
+                <p><strong>Tipo:</strong> {{ productoDetalle.tipo }}</p>
+                <p><strong>Tasa Interés:</strong> {{ productoDetalle.tasaInteres }}%</p>
+                <p><strong>Plazo:</strong> {{ productoDetalle.plazo }} meses</p>
+                <p><strong>Estado:</strong> {{ productoDetalle.estado }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="servicioActual === 'AGREGAR_FAVORITO'">
+        <h4 class="mb-3 text-warning">Agregar a Favoritos</h4>
+        <div class="card p-3">
+            <p class="text-muted"><strong>IN:</strong> Datos para Favorito</p>
+            <form v-on:submit.prevent="ejecutarAgregarFavorito">
+                <div class="form-row">
+                    <div class="col-md-6 mb-3">
+                        <label>ID Usuario</label>
+                        <input type="number" class="form-control" v-model="formFavorito.idUsuario" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>ID Producto</label>
+                        <input type="number" class="form-control" v-model="formFavorito.idProducto" required>
+                    </div>
+                </div>
+                <button class="btn btn-warning btn-block">Agregar a Favoritos</button>
+            </form>
+        </div>
+    </div>
+
+    <div v-if="servicioActual === 'ELIMINAR_FAVORITO'">
+        <h4 class="mb-3 text-danger">Eliminar de Favoritos</h4>
+        <div class="card p-3 bg-light">
+            <p class="text-muted"><strong>IN:</strong> Parámetros DELETE</p>
+            <div class="form-row">
+                <div class="col-md-6 mb-3">
+                    <label>ID Usuario</label>
+                    <input type="number" class="form-control" v-model="inputs.favUserId" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>ID Producto</label>
+                    <input type="number" class="form-control" v-model="inputs.favProdId" required>
+                </div>
+            </div>
+            <button class="btn btn-danger btn-block" v-on:click="ejecutarEliminarFavorito">Eliminar Favorito</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/js/api/productos.js"></script>
+
+<style>
+    .btn-card { cursor: pointer; transition: 0.2s; border: 1px solid #ddd; }
+    .btn-card:hover { transform: translateY(-3px); background-color: #f8f9fa; border-color: #007bff; }
+</style>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            servicioActual: '',
+            
+            // Outputs
+            listaProductos: [],
+            productoDetalle: null,
+
+            // Inputs (Testing Manual)
+            inputs: {
+                idUsuarioOferta: null,
+                idProductoDetalle: null,
+                favUserId: null,
+                favProdId: null
+            },
+            formFavorito: {
+                idUsuario: null,
+                idProducto: null
+            }
+        },
+        methods: {
+            seleccionarServicio(servicio) {
+                this.servicioActual = servicio;
+                this.limpiarDatos();
+            },
+            volverAlMenu() {
+                this.servicioActual = '';
+                this.limpiarDatos();
+            },
+            limpiarDatos() {
+                this.listaProductos = [];
+                this.productoDetalle = null;
+            },
+
+            // --- EJECUCIÓN DE SERVICIOS ---
+
+            // 1. Listar Personalizados
+            ejecutarListarPersonalizados() {
+                if(!this.inputs.idUsuarioOferta) return alert("Ingrese ID Usuario");
+                ProductosAPI.listarPersonalizados(this.inputs.idUsuarioOferta)
+                    .then(res => this.listaProductos = res.body)
+                    .catch(err => alert("Error o lista vacía"));
+            },
+
+            // 2. Ver Detalle
+            ejecutarVerDetalle() {
+                if(!this.inputs.idProductoDetalle) return alert("Ingrese ID Producto");
+                ProductosAPI.obtener(this.inputs.idProductoDetalle)
+                    .then(res => this.productoDetalle = res.body)
+                    .catch(err => alert("Producto no encontrado"));
+            },
+
+            // 3. Agregar Favorito
+            ejecutarAgregarFavorito() {
+                if(!this.formFavorito.idUsuario || !this.formFavorito.idProducto) return alert("Faltan datos");
+                ProductosAPI.agregarFavorito(this.formFavorito)
+                    .then(res => {
+                        alert("OUT: " + (res.body.message || "Agregado a favoritos"));
+                        this.volverAlMenu();
+                    })
+                    .catch(err => alert("Error: " + (err.body.message || "Fallo servidor")));
+            },
+
+            // 4. Eliminar Favorito
+            ejecutarEliminarFavorito() {
+                if(!this.inputs.favUserId || !this.inputs.favProdId) return alert("Faltan datos");
+                ProductosAPI.eliminarFavorito(this.inputs.favUserId, this.inputs.favProdId)
+                    .then(res => {
+                        alert("OUT: " + (res.body.message || "Eliminado de favoritos"));
+                    })
+                    .catch(err => alert("Error: No encontrado o fallo servidor"));
+            }
+        }
+    });
+</script>

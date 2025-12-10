@@ -1,0 +1,380 @@
+﻿@page
+@{
+    ViewData["Title"] = "Gestión Cuentas de Ahorro";
+    // YA NO HAY ID HARCODEADO AQUÍ
+}
+
+<div id="app" class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-secondary">Módulo de Ahorros (Modo Prueba)</h2>
+        <div>
+            <button v-if="seccionActual !== 'MENU'" class="btn btn-outline-secondary btn-sm" v-on:click="volverAlMenu">
+                <i class="fa fa-home"></i> Menú Principal
+            </button>
+            <button v-if="servicioActual !== ''" class="btn btn-outline-primary btn-sm ml-2" v-on:click="volverASubMenu">
+                <i class="fa fa-arrow-left"></i> Volver a Servicios
+            </button>
+        </div>
+    </div>
+
+    <div v-if="seccionActual === 'MENU'" class="row text-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm btn-card h-100" v-on:click="irASeccion('DATOS')">
+                <div class="card-body">
+                    <h1 class="text-primary"><i class="fa fa-cogs"></i></h1>
+                    <h5 class="card-title mt-3">Gestión de Cuentas</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm btn-card h-100" v-on:click="irASeccion('DETALLES')">
+                <div class="card-body">
+                    <h1 class="text-success"><i class="fa fa-wallet"></i></h1>
+                    <h5 class="card-title mt-3">Mis Productos</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm btn-card h-100" v-on:click="irASeccion('MOVIMIENTOS')">
+                <div class="card-body">
+                    <h1 class="text-info"><i class="fa fa-exchange-alt"></i></h1>
+                    <h5 class="card-title mt-3">Movimientos</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="seccionActual === 'DATOS'">
+        <div v-if="servicioActual === ''">
+            <h4 class="mb-3 text-primary">Servicios de Gestión</h4>
+            <div class="list-group">
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('LISTAR_TIPOS')">1. Catálogo de Tipos de Cuenta</button>
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('VER_REQUISITOS')">2. Consultar Requisitos</button>
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('CREAR_CUENTA')">3. Apertura de Cuenta</button>
+                <button class="list-group-item list-group-item-action text-danger" v-on:click="seleccionarServicio('ELIMINAR_CUENTA')">4. Cierre de Cuenta</button>
+            </div>
+        </div>
+
+        <div v-if="servicioActual === 'LISTAR_TIPOS'">
+            <h5><span class="badge badge-primary">GET</span> Catálogo de Tipos</h5>
+            <button class="btn btn-primary btn-sm mb-3" v-on:click="ejecutarListarTipos">Ejecutar Servicio</button>
+            <table class="table table-bordered table-sm" v-if="listaTipos.length > 0">
+                <thead class="thead-light"><tr><th>ID</th><th>Nombre</th><th>Moneda</th><th>Tasa</th></tr></thead>
+                <tbody>
+                    <tr v-for="t in listaTipos">
+                        <td>{{ t.idTipoCuenta }}</td>
+                        <td>{{ t.nombre }}</td>
+                        <td>{{ t.moneda }}</td>
+                        <td>{{ t.tasaInteres }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-if="servicioActual === 'VER_REQUISITOS'">
+            <h5><span class="badge badge-primary">GET</span> Consultar Requisitos</h5>
+            <div class="card p-3 bg-light mb-3">
+                <label><strong>IN:</strong> ID Tipo de Cuenta</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" v-model="inputs.idTipoCuenta" placeholder="Ej: 1">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" v-on:click="ejecutarVerRequisitos">Consultar</button>
+                    </div>
+                </div>
+            </div>
+            <ul class="list-group" v-if="listaRequisitos.length > 0">
+                <li class="list-group-item active">Requisitos:</li>
+                <li class="list-group-item" v-for="r in listaRequisitos">{{ r.descripcion }}</li>
+            </ul>
+        </div>
+
+        <div v-if="servicioActual === 'CREAR_CUENTA'">
+            <h5><span class="badge badge-success">POST</span> Apertura de Cuenta</h5>
+            <div class="card p-3">
+                <p class="text-muted"><strong>IN:</strong> Objeto Cuenta</p>
+                <form v-on:submit.prevent="ejecutarCrearCuenta">
+                    <div class="form-row">
+                        <div class="col-md-6 mb-2">
+                            <label>ID Usuario (Manual)</label>
+                            <input type="number" class="form-control" v-model="formCuenta.idUsuario" required placeholder="Ingrese ID Usuario">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label>ID Tipo Cuenta</label>
+                            <input type="number" class="form-control" v-model="formCuenta.idTipoCuenta" required placeholder="Ej: 1">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label>Número Cuenta</label>
+                            <input type="text" class="form-control" v-model="formCuenta.numeroCuenta" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label>Saldo Inicial</label>
+                            <input type="number" class="form-control" v-model.number="formCuenta.saldoInicial" min="0">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block mt-2">Crear Cuenta</button>
+                </form>
+            </div>
+        </div>
+
+        <div v-if="servicioActual === 'ELIMINAR_CUENTA'">
+            <h5><span class="badge badge-danger">DELETE</span> Cierre de Cuenta</h5>
+            <div class="card p-3 bg-light">
+                <label><strong>IN:</strong> ID de la Cuenta</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" v-model="inputs.idCuentaEliminar" placeholder="Ingrese ID Cuenta">
+                    <div class="input-group-append">
+                        <button class="btn btn-danger" v-on:click="ejecutarEliminarCuenta">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="seccionActual === 'DETALLES'">
+        <div v-if="servicioActual === ''">
+            <h4 class="mb-3 text-success">Servicios de Consulta</h4>
+            <div class="list-group">
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('LISTAR_MIS_AHORROS')">1. Mis Productos de Ahorro</button>
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('DETALLE_ESPECIFICO')">2. Detalle de Producto Específico</button>
+            </div>
+        </div>
+
+        <div v-if="servicioActual === 'LISTAR_MIS_AHORROS'">
+            <h5><span class="badge badge-primary">GET</span> Mis Productos</h5>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label"><strong>IN:</strong> ID Usuario (Manual)</label>
+                <div class="col-sm-4">
+                    <input type="number" class="form-control" v-model="inputs.idUsuarioConsulta" placeholder="Ingrese ID Usuario">
+                </div>
+                <div class="col-sm-2">
+                    <button class="btn btn-primary" v-on:click="ejecutarListarMisAhorros">Listar</button>
+                </div>
+            </div>
+            <table class="table table-hover mt-3" v-if="listaMisAhorros.length > 0">
+                <thead><tr><th>ID Depósito</th><th>Cuenta</th><th>Tipo</th><th>Saldo</th></tr></thead>
+                <tbody>
+                    <tr v-for="a in listaMisAhorros">
+                        <td>{{ a.idDeposito }}</td>
+                        <td>{{ a.numeroCuenta }}</td>
+                        <td>{{ a.tipoCuenta }}</td>
+                        <td class="font-weight-bold">{{ a.saldoDisponible }} {{ a.moneda }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-if="servicioActual === 'DETALLE_ESPECIFICO'">
+            <h5><span class="badge badge-primary">GET</span> Detalle de Ahorro</h5>
+            <div class="card p-3 bg-light mb-3">
+                <label><strong>IN:</strong> ID Ahorro (Depósito)</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" v-model="inputs.idAhorroDetalle" placeholder="Ingrese ID Depósito">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" v-on:click="ejecutarVerDetalleAhorro">Obtener Detalle</button>
+                    </div>
+                </div>
+            </div>
+            <div v-if="detalleAhorro" class="card border-success mb-3">
+                <div class="card-header bg-transparent border-success">Resultado OUT:</div>
+                <div class="card-body text-success">
+                    <h5 class="card-title">Cuenta: {{ detalleAhorro.numeroCuenta }}</h5>
+                    <p class="card-text">
+                        <strong>Tipo:</strong> {{ detalleAhorro.tipoCuenta }}<br>
+                        <strong>Saldo:</strong> {{ detalleAhorro.saldoDisponible }} {{ detalleAhorro.moneda }}<br>
+                        <strong>Fecha Creación:</strong> {{ detalleAhorro.fechaCreacion }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="seccionActual === 'MOVIMIENTOS'">
+        <div v-if="servicioActual === ''">
+            <h4 class="mb-3 text-info">Servicios de Movimientos</h4>
+            <div class="list-group">
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('LISTAR_MOVIMIENTOS')">1. Historial Completo</button>
+                <button class="list-group-item list-group-item-action" v-on:click="seleccionarServicio('MOVIMIENTOS_RANGO')">2. Filtro por Rango de Fechas</button>
+            </div>
+        </div>
+
+        <div v-if="servicioActual === 'LISTAR_MOVIMIENTOS'">
+            <h5><span class="badge badge-primary">GET</span> Historial de Movimientos</h5>
+            <div class="card p-3 bg-light mb-3">
+                <label><strong>IN:</strong> ID Cuenta</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" v-model="inputs.idCuentaMov" placeholder="Ingrese ID Cuenta">
+                    <div class="input-group-append">
+                        <button class="btn btn-info" v-on:click="ejecutarListarMovimientos">Consultar</button>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-sm" v-if="listaMovimientos.length > 0">
+                <thead class="thead-dark"><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Desc.</th></tr></thead>
+                <tbody>
+                    <tr v-for="m in listaMovimientos">
+                        <td>{{ m.fecha }}</td>
+                        <td>{{ m.tipo }}</td>
+                        <td>{{ m.monto }}</td>
+                        <td>{{ m.descripcion }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-if="servicioActual === 'MOVIMIENTOS_RANGO'">
+            <h5><span class="badge badge-primary">GET</span> Filtrar Movimientos</h5>
+            <div class="card p-3 bg-light mb-3">
+                <p class="text-muted mb-2"><strong>IN:</strong> Parámetros de Búsqueda</p>
+                <div class="form-row">
+                    <div class="col-md-4">
+                        <label>ID Cuenta</label>
+                        <input type="number" class="form-control" v-model="inputs.rangoIdCuenta" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Fecha Inicio</label>
+                        <input type="date" class="form-control" v-model="inputs.rangoInicio" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Fecha Fin</label>
+                        <input type="date" class="form-control" v-model="inputs.rangoFin" required>
+                    </div>
+                </div>
+                <button class="btn btn-info btn-block mt-3" v-on:click="ejecutarMovimientosRango">Ejecutar Filtro</button>
+            </div>
+            <table class="table table-sm table-striped" v-if="listaMovimientos.length > 0">
+                <thead class="thead-dark"><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Desc.</th></tr></thead>
+                <tbody>
+                    <tr v-for="m in listaMovimientos">
+                        <td>{{ m.fecha }}</td>
+                        <td>{{ m.tipo }}</td>
+                        <td>{{ m.monto }}</td>
+                        <td>{{ m.descripcion }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/js/api/cuentas.js"></script>
+<script src="~/js/api/misAhorros.js"></script>
+<script src="~/js/api/movimientos.js"></script>
+
+<style>
+    .btn-card {
+        cursor: pointer;
+        transition: 0.2s;
+        border: 1px solid #ddd;
+    }
+
+        .btn-card:hover {
+            transform: translateY(-3px);
+            background-color: #f1f3f5;
+            border-color: #007bff;
+        }
+</style>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            seccionActual: 'MENU',
+            servicioActual: '',
+            listaTipos: [],
+            listaRequisitos: [],
+            listaMisAhorros: [],
+            detalleAhorro: null,
+            listaMovimientos: [],
+
+            // TODOS LOS INPUTS EN NULL PARA SER INGRESADOS MANUALMENTE
+            inputs: {
+                idTipoCuenta: null,
+                idCuentaEliminar: null,
+                idUsuarioConsulta: null, // LIBERADO
+                idAhorroDetalle: null,
+                idCuentaMov: null,
+                rangoIdCuenta: null,
+                rangoInicio: "",
+                rangoFin: ""
+            },
+            formCuenta: {
+                idUsuario: null,         // LIBERADO
+                idTipoCuenta: null,
+                numeroCuenta: "",
+                saldoInicial: 0
+            }
+        },
+        methods: {
+            irASeccion(seccion) {
+                this.seccionActual = seccion;
+                this.servicioActual = '';
+                this.limpiarSalidas();
+            },
+            seleccionarServicio(nombreServicio) {
+                this.servicioActual = nombreServicio;
+                this.limpiarSalidas();
+            },
+            volverAlMenu() {
+                this.seccionActual = 'MENU';
+                this.servicioActual = '';
+            },
+            volverASubMenu() {
+                this.servicioActual = '';
+                this.limpiarSalidas();
+            },
+            limpiarSalidas() {
+                this.listaTipos = [];
+                this.listaRequisitos = [];
+                this.listaMisAhorros = [];
+                this.listaMovimientos = [];
+                this.detalleAhorro = null;
+            },
+            // SERVICIOS DATOS
+            ejecutarListarTipos() {
+                CuentasAPI.listarTipos().then(r => this.listaTipos = r.body).catch(e => alert("Error"));
+            },
+            ejecutarVerRequisitos() {
+                if(!this.inputs.idTipoCuenta) return alert("Ingresa ID");
+                CuentasAPI.verRequisitos(this.inputs.idTipoCuenta).then(r => this.listaRequisitos = r.body).catch(e => alert("No encontrado"));
+            },
+            ejecutarCrearCuenta() {
+                // Ahora validamos que el usuario haya escrito el ID manualmente
+                if(!this.formCuenta.idUsuario || !this.formCuenta.idTipoCuenta) return alert("Faltan datos (ID Usuario o Tipo)");
+                CuentasAPI.crear(this.formCuenta).then(r => {
+                    alert("Cuenta creada!"); this.volverASubMenu();
+                }).catch(e => alert("Error: " + (e.body.message || "Error")));
+            },
+            ejecutarEliminarCuenta() {
+                if(!this.inputs.idCuentaEliminar) return alert("Ingresa ID");
+                if(confirm("¿Eliminar?")) {
+                    CuentasAPI.eliminar(this.inputs.idCuentaEliminar).then(r => { alert("Eliminada"); this.inputs.idCuentaEliminar=null; }).catch(e => alert("Error"));
+                }
+            },
+            // SERVICIOS DETALLES
+            ejecutarListarMisAhorros() {
+                // Ahora validamos que el usuario haya escrito el ID manualmente
+                if(!this.inputs.idUsuarioConsulta) return alert("Ingresa un ID de Usuario para consultar");
+                MisAhorrosAPI.listarPorUsuario(this.inputs.idUsuarioConsulta).then(r => this.listaMisAhorros = r.body).catch(e => alert("Sin datos"));
+            },
+            ejecutarVerDetalleAhorro() {
+                if(!this.inputs.idAhorroDetalle) return alert("Ingresa ID Ahorro");
+                MisAhorrosAPI.verDetalle(this.inputs.idAhorroDetalle).then(r => this.detalleAhorro = r.body).catch(e => alert("No encontrado"));
+            },
+            // SERVICIOS MOVIMIENTOS
+            ejecutarListarMovimientos() {
+                if(!this.inputs.idCuentaMov) return alert("Ingresa ID Cuenta");
+                MovimientosAPI.listar(this.inputs.idCuentaMov).then(r => this.listaMovimientos = r.body).catch(e => alert("Sin datos"));
+            },
+            ejecutarMovimientosRango() {
+                if(!this.inputs.rangoIdCuenta || !this.inputs.rangoInicio || !this.inputs.rangoFin) return alert("Faltan datos");
+                MovimientosAPI.listarPorRango(this.inputs.rangoIdCuenta, this.inputs.rangoInicio, this.inputs.rangoFin).then(r => this.listaMovimientos = r.body).catch(e => alert("Sin datos"));
+            }
+        }
+    });
+</script>

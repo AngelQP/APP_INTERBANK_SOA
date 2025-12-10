@@ -1,0 +1,203 @@
+﻿@page
+@model VUE_APP_INTERBANK.Pages.ActualizarDatosModel
+@{
+    ViewData["Title"] = "Actualización de Datos";
+}
+
+<div id="app" class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-secondary">Actualizar Datos (PUT)</h2>
+        <button v-if="servicioActual !== ''" class="btn btn-outline-primary btn-sm" v-on:click="volverAlMenu">
+            <i class="fa fa-arrow-left"></i> Volver al Selector
+        </button>
+    </div>
+
+    <div v-if="servicioActual === ''" class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm btn-card h-100" v-on:click="servicioActual = 'ACTUALIZAR_CUENTA'">
+                <div class="card-body text-center">
+                    <h1 class="text-primary"><i class="fa fa-university"></i></h1>
+                    <h5 class="card-title mt-3">Actualizar Datos de Cuenta</h5>
+                    <p class="text-muted small">Servicio PUT para modificar saldo/tipo de una cuenta existente.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm btn-card h-100" v-on:click="servicioActual = 'ACTUALIZAR_PRODUCTO'">
+                <div class="card-body text-center">
+                    <h1 class="text-success"><i class="fa fa-box-open"></i></h1>
+                    <h5 class="card-title mt-3">Actualizar Datos de Producto</h5>
+                    <p class="text-muted small">Servicio PUT para modificar tasas/plazos de un producto financiero.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="servicioActual === 'ACTUALIZAR_CUENTA'">
+        <h4 class="mb-3 text-primary">Actualizar Cuenta de Ahorro</h4>
+        <div class="card p-4">
+            <p class="text-muted"><strong>IN:</strong> ID Cuenta + Objeto Detalle (GuardarDetalleProductoDTO)</p>
+            
+            <form v-on:submit.prevent="actualizarCuenta">
+                <div class="form-group">
+                    <label class="font-weight-bold text-danger">ID de Cuenta a Modificar (URL)</label>
+                    <input type="number" class="form-control" v-model="inputCuentaId" required placeholder="ID Cuenta">
+                </div>
+
+                <hr>
+                <h6 class="text-secondary">Nuevos Datos (Body)</h6>
+
+                <div class="form-row">
+                    <div class="col-md-4 mb-3">
+                        <label>ID Cuenta (Body)</label>
+                        <input type="number" class="form-control" v-model="formCuenta.idCuenta" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Número Cuenta</label>
+                        <input type="text" class="form-control" v-model="formCuenta.numeroCuenta" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Tipo Cuenta</label>
+                        <input type="text" class="form-control" v-model="formCuenta.tipoCuenta" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Saldo Disponible</label>
+                        <input type="number" class="form-control" v-model="formCuenta.saldoDisponible" step="0.01">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Moneda</label>
+                        <input type="text" class="form-control" v-model="formCuenta.moneda" placeholder="PEN / USD">
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label>Fecha Creación</label>
+                        <input type="datetime-local" class="form-control" v-model="formCuenta.fechaCreacion">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block">Enviar Actualización (PUT)</button>
+            </form>
+        </div>
+    </div>
+
+    <div v-if="servicioActual === 'ACTUALIZAR_PRODUCTO'">
+        <h4 class="mb-3 text-success">Actualizar Producto Financiero</h4>
+        <div class="card p-4">
+            <p class="text-muted"><strong>IN:</strong> ID Producto + Objeto Producto (ProductoDto)</p>
+            
+            <form v-on:submit.prevent="actualizarProducto">
+                <div class="form-group">
+                    <label class="font-weight-bold text-danger">ID de Producto a Modificar (URL)</label>
+                    <input type="number" class="form-control" v-model="inputProductoId" required placeholder="ID Producto">
+                </div>
+
+                <hr>
+                <h6 class="text-secondary">Nuevos Datos (Body)</h6>
+
+                <div class="form-row">
+                    <div class="col-md-4 mb-3">
+                        <label>ID Producto (Body)</label>
+                        <input type="number" class="form-control" v-model="formProducto.idProducto" required>
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label>Nombre Producto</label>
+                        <input type="text" class="form-control" v-model="formProducto.nombre" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Tipo</label>
+                        <input type="text" class="form-control" v-model="formProducto.tipo">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Estado</label>
+                        <input type="text" class="form-control" v-model="formProducto.estado" placeholder="ACTIVO/INACTIVO">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Tasa Interés</label>
+                        <input type="number" class="form-control" v-model="formProducto.tasaInteres" step="0.01">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Plazo (Meses)</label>
+                        <input type="number" class="form-control" v-model="formProducto.plazo">
+                    </div>
+                </div>
+
+                <button class="btn btn-success btn-block">Enviar Actualización (PUT)</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/js/api/cuentas.js"></script>
+<script src="~/js/api/productos.js"></script>
+
+<style>
+    .btn-card { cursor: pointer; transition: 0.2s; border: 1px solid #ddd; }
+    .btn-card:hover { transform: translateY(-3px); background-color: #f8f9fa; border-color: #28a745; }
+</style>
+
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            servicioActual: '',
+
+            // Inputs para Actualizar Cuenta
+            inputCuentaId: null,
+            formCuenta: {
+                idCuenta: 0,
+                numeroCuenta: "",
+                tipoCuenta: "",
+                saldoDisponible: 0,
+                moneda: "",
+                fechaCreacion: new Date().toISOString().slice(0, 16) // Formato fecha local
+            },
+
+            // Inputs para Actualizar Producto
+            inputProductoId: null,
+            formProducto: {
+                idProducto: 0,
+                nombre: "",
+                tipo: "",
+                tasaInteres: 0,
+                plazo: 0,
+                estado: "ACTIVO"
+            }
+        },
+        methods: {
+            volverAlMenu() {
+                this.servicioActual = '';
+            },
+
+            // 1. ACTUALIZAR CUENTA (CuentasAPI.actualizar)
+            actualizarCuenta() {
+                if(!this.inputCuentaId) return alert("Ingrese el ID de Cuenta en la URL");
+
+                CuentasAPI.actualizar(this.inputCuentaId, this.formCuenta)
+                    .then(res => {
+                        alert("OUT: " + (res.body.message || "Cuenta Actualizada Correctamente"));
+                        this.volverAlMenu();
+                    })
+                    .catch(err => alert("Error PUT: " + (err.body.message || "Fallo en servidor")));
+            },
+
+            // 2. ACTUALIZAR PRODUCTO (ProductosAPI.actualizar)
+            actualizarProducto() {
+                if(!this.inputProductoId) return alert("Ingrese el ID de Producto en la URL");
+
+                ProductosAPI.actualizar(this.inputProductoId, this.formProducto)
+                    .then(res => {
+                        alert("OUT: " + (res.body.message || "Producto Actualizado Correctamente"));
+                        this.volverAlMenu();
+                    })
+                    .catch(err => alert("Error PUT: " + (err.body.message || "Fallo en servidor")));
+            }
+        }
+    });
+</script>
